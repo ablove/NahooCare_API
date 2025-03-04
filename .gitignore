@@ -1,0 +1,24 @@
+# Git folder (not necessary, Git ignores itself automatically)
+.git
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environment folder
+NahoCare_API-env/
+.env
+
+# Node.js
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.db
+
+# Electron build files
+*.asar
