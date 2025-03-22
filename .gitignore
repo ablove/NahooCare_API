@@ -22,3 +22,6 @@ dist/
 
 # Electron build files
 *.asar
+
+NahoCare_API 
+__pycache__
