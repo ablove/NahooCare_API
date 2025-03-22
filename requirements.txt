@@ -1,2 +1,8 @@
 fastapi
 uvicorn
+pymongo
+motor
+python-dotenv
+bcrypt
+pyjwt
+passlib[bcrypt]
