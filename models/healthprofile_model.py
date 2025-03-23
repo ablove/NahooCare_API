@@ -13,7 +13,6 @@ class PyObjectId(str):
             raise ValueError("Invalid ObjectId")
         return str(v)  # Store as string for compatibility
 
-
 class HealthProfile(BaseModel):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     profile_id: str
@@ -23,6 +22,7 @@ class HealthProfile(BaseModel):
     chronic_conditions: str
     medical_history: str 
     last_update: datetime = Field(default_factory=datetime.utcnow)  # Auto timestamp
+
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
         arbitrary_types_allowed = True  # Allows ObjectId if needed

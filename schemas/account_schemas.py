@@ -25,3 +25,5 @@ class AccountResponse(BaseModel):
     location: str
     gender: str
     age: int
+    
+    

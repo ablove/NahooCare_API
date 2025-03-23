@@ -56,3 +56,4 @@ async def reset_user_password(data: PasswordResetSchema):
     if success:
         return {"message": "Password reset successfully"}
     raise HTTPException(status_code=400, detail="Invalid secret answer or phone number")
+

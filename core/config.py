@@ -1,7 +1,9 @@
-import os
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
+
+load_dotenv(dotenv_path=".env")  # Explicitly specify the .env file path
 
 class Settings:
     MONGO_CONNECTION_STRING: str = os.getenv("MONGO_CONNECTION_STRING")
