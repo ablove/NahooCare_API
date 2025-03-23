@@ -91,3 +91,35 @@ async def delete_healthcare_center(center_id: str):
     except Exception as e:
         logging.error(f"Error deleting healthcare center: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+async def search_engin_health_care_center(search_data: HealthcareSearch):
+    try:
+        query = {}
+
+        # 🔹 Search by Name
+        if search_data.name:
+            query["name"] = {"$regex": search_data.name, "$options": "i"}  # Case-insensitive
+
+        # 🔹 Search by Specialty
+        if search_data.specialty:
+            query["specialists"] = search_data.specialty  # Matches exact specialty
+
+        # 🔹 Search by Location (Geo-based)
+        if search_data.latitude and search_data.longitude:
+            query["location"] = {
+                "$near": {
+                    "$geometry": {"type": "Point", "coordinates": [search_data.longitude, search_data.latitude]},
+                    "$maxDistance": search_data.max_distance_km * 1000  # Convert km to meters
+                }
+            }
+
+        # 🔹 Pagination
+        skip = (search_data.page - 1) * search_data.page_size
+        centers = await collection.find(query).skip(skip).limit(search_data.page_size).to_list(None)
+
+        if not centers:
+            raise HTTPException(status_code=404, detail="No matching healthcare centers found")
+        return centers
+
+    except Exception as e:
+        logging.error(f"Error searching healthcare centers: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
