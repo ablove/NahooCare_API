@@ -66,3 +66,4 @@ async def delete_search_history(search_id: str = None, user_id: str = None):
     except Exception as e:
         print(f"Error during deletion: {e}")
         return 0
+    
