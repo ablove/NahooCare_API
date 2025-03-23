@@ -28,14 +28,14 @@ async def login(data: LoginSchema):
 
 # Get Account (Protected Route)
 @router.get("/{user_id}")
-async def get_user_account(user_id: int, current_user: dict = Depends(get_current_user)):
+async def get_user_account(user_id: int):
     account = await get_account(user_id)
     if account:
         return account
     raise HTTPException(status_code=404, detail="User not found")
 
 @router.put("/{user_id}")
-async def update_user_account(user_id: int, update_data: dict, current_user: dict = Depends(get_current_user)):
+async def update_user_account(user_id: int, update_data: dict):
     modified_count = await update_account(user_id, update_data)
     if modified_count:
         return {"message": "Account updated successfully"}
@@ -43,7 +43,7 @@ async def update_user_account(user_id: int, update_data: dict, current_user: dic
 
 
 @router.delete("/{user_id}")
-async def delete_user_account(user_id: int, current_user: dict = Depends(get_current_user)):
+async def delete_user_account(user_id: int):
     deleted_count = await delete_account(user_id)
     if deleted_count:
         return {"message": "Account deleted successfully"}

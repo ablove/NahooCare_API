@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from db.mongodb import database
 from models.account_model import Account
 from schemas.account_schemas import AccountCreate, LoginSchema, PasswordResetSchema
@@ -5,57 +6,119 @@ from core.security import hash_password, verify_password, create_access_token
 from bson import ObjectId
 from datetime import timedelta
 from core.config import settings
+import logging
 
 collection = database["accounts"]
 
-#  Register a New Account
+
 async def create_account(account: AccountCreate):
-    existing_user = await collection.find_one({"phone_number": account.phone_number})
-    if existing_user:
-        return None  # User already exists
+    try:
+        existing_user = await collection.find_one({"phone_number": account.phone_number})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Phone number already registered")
 
-    hashed_password = hash_password(account.password)
-    hashed_secret_answer = hash_password(account.secret_answer)
+        hashed_password = hash_password(account.password)
+        
 
-    account_data = account.dict()
-    account_data["hashed_password"] = hashed_password
-    account_data["secret_answer"] = hashed_secret_answer
+        account_data = account.dict()
+        account_data["hashed_password"] = hashed_password
 
-    del account_data["password"]  # Remove plain text password
-    del account_data["secret_answer"]  # Remove plain text secret answer
 
-    result = await collection.insert_one(account_data)
-    return str(result.inserted_id)
+        del account_data["password"]  # Remove plain text password
 
-#  Authenticate User for Login
+        result = await collection.insert_one(account_data)
+        if not result.inserted_id:
+            raise HTTPException(status_code=500, detail="Failed to create account")
+
+        return str(result.inserted_id)
+
+    except Exception as e:
+        logging.error(f"Error creating account: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 async def authenticate_user(phone_number: str, password: str):
-    user = await collection.find_one({"phone_number": phone_number})
-    if user and verify_password(password, user["hashed_password"]):
+    try:
+        user = await collection.find_one({"phone_number": phone_number})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid phone number or password")
+
+        if not verify_password(password, user["hashed_password"]):
+            raise HTTPException(status_code=401, detail="Invalid phone number or password")
+
         return user
-    return None
 
-# Get User Account by user_id
+    except Exception as e:
+        logging.error(f"Authentication error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 async def get_account(user_id: int):
-    account = await collection.find_one({"user_id": user_id}, {"hashed_password": 0, "secret_answer": 0})
-    if account:
+    try:
+        account = await collection.find_one({"user_id": user_id}, {"hashed_password": 0, "secret_answer": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="User not found")
+
         account["_id"] = str(account["_id"])
-    return account
+        return account
 
-# Update User Account
+    except Exception as e:
+        logging.error(f"Error retrieving user: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 async def update_account(user_id: int, update_data: dict):
-    result = await collection.update_one({"user_id": user_id}, {"$set": update_data})
-    return result.modified_count
+    try:
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No update data provided")
 
-# Delete User Account
+        result = await collection.update_one({"user_id": user_id}, {"$set": update_data})
+        if result.modified_count == 0:
+            raise HTTPException(status_code=400, detail="No changes were made")
+
+        return {"message": "Account updated successfully"}
+
+    except Exception as e:
+        logging.error(f"Error updating account: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 async def delete_account(user_id: int):
-    result = await collection.delete_one({"user_id": user_id})
-    return result.deleted_count
+    try:
+        result = await collection.delete_one({"user_id": user_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
 
-# Reset Password using Secret Question
+        return {"message": "Account deleted successfully"}
+
+    except Exception as e:
+        logging.error(f"Error deleting account: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 async def reset_password(data: PasswordResetSchema):
-    user = await collection.find_one({"phone_number": data.phone_number})
-    if user and verify_password(data.secret_answer, user["secret_answer"]):
+    try:
+        user = await collection.find_one({"phone_number": data.phone_number})
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        print(user)
+        if "secret_answer" not in user:
+            raise HTTPException(status_code=400, detail="Secret answer not set for this account")
+
+        if user["secret_answer"] != data.secret_answer:
+            raise HTTPException(status_code=400, detail="Incorrect secret answer")
+
         new_hashed_password = hash_password(data.new_password)
-        await collection.update_one({"phone_number": data.phone_number}, {"$set": {"hashed_password": new_hashed_password}})
-        return True
-    return False
+        update_result = await collection.update_one(
+            {"phone_number": data.phone_number},
+            {"$set": {"hashed_password": new_hashed_password}}
+        )
+
+        if update_result.modified_count == 0:
+            raise HTTPException(status_code=500, detail="Failed to reset password")
+
+        return {"message": "Password reset successfully"}
+
+    except Exception as e:
+        logging.error(f"Error resetting password: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
