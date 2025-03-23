@@ -23,3 +23,6 @@ class HealthcareCenter(BaseModel):
     longitude: float
     specialists: List[str] 
     contact_number: str 
+    class Config:
+        json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
+        arbitrary_types_allowed = True  # Allows ObjectId if needed
