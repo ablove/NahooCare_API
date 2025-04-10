@@ -22,8 +22,8 @@ class HealthcareCenter(BaseModel):
     latitude: float 
     longitude: float
     specialists: List[str]
-    available_Time : List[str]
-    contact_number: Dict[str, str]
+    available_time : List[str]
+    contact_info: Dict[str, str]
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
         arbitrary_types_allowed = True  # Allows ObjectId if needed

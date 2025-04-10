@@ -2,7 +2,7 @@ import uuid
 from fastapi import HTTPException
 from db.mongodb import database
 from models.healthcare_model import HealthcareCenter
-from schemas.healthcare_schema import HealthcareCenterCreate, HealthcareSearch ,HealthcareCenterUpdate
+from schemas.healthcare_schema import HealthcareCenterCreate, HealthcareSearch ,HealthcareCenterUpdate, HelathcareCenterRespons
 from bson import ObjectId
 from pymongo import GEOSPHERE
 import logging
@@ -22,7 +22,7 @@ async def create_healthcare_center(center: HealthcareCenterCreate):
         
         center_data["location"] = {"type": "Point", "coordinates": [center.longitude, center.latitude]} 
         # Geospatial field
-        center_data["center_id"] = "center_id" + center.name
+        center_data["center_id"] = "center_id_" + center.name
         result = await collection.insert_one(center_data)
         if not result.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to create healthcare center")
@@ -124,3 +124,27 @@ async def search_engin_health_care_center(search_data: HealthcareSearch):
     except Exception as e:
         logging.error(f"Error searching healthcare centers: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+async def get_healthcareCenter(name: str):
+    try:
+        existing_center = await collection.find_one({"name": name})
+        
+        if not existing_center: 
+            raise HTTPException(status_code=404, detail="Healthcare Center not found")
+            
+        if "_id" in existing_center:
+            existing_center['_id'] = str(existing_center['_id'])
+            
+        return HelathcareCenterRespons(
+            center_id=existing_center["center_id"],
+            name=existing_center["name"],
+            address=existing_center["address"],
+            latitude=existing_center["latitude"],
+            longitude=existing_center["longitude"],
+            specialists=existing_center["specialists"],
+            contact_info=existing_center["contact_info"],
+            available_time=existing_center["available_time"]
+        )
+    except Exception as e:
+        logging.error(f"Error getting healthcare center: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+

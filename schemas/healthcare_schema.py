@@ -8,8 +8,10 @@ class HealthcareCenterCreate(BaseModel):
     latitude: float = Field(..., example=9.0456)
     longitude: float = Field(..., example=38.7612)
     specialists: List[str] = Field(..., example=["Cardiology", "Neurology"])
-    contact_number: Dict[str, str]= Field(..., example=["www.example.com","+254253525425432523"])
-    available_Time : List[str] = Field(..., example=["it works every day 8:00 am - 10:pm "])
+    contact_info: Optional[Dict[str, str]] = Field(..., example= {
+    "Reception": "+251-11-123-4567",
+    "Emergency": "+251-91-234-5678"})
+    available_time : List[str] = Field(..., example=["it works every day 8:00 am - 10:pm "])
 
 class HealthcareSearch(BaseModel):
     specialty: str = Field(..., example="Cardiology")
@@ -22,5 +24,18 @@ class HealthcareCenterUpdate(BaseModel):
     latitude: Optional[float] = Field(None, example=9.0556)
     longitude: Optional[float] = Field(None, example=38.7623)
     specialists: Optional[List[str]] = Field(None, example=["Pediatrics", "Cardiology"])
-    contact_number: Optional[Dict[str, str]] = Field(None, example=["www.example.com","+254253525425432523"])
-    available_Time : Optional[List[str]] = Field(..., example=["it works every day 8:00 am - 10:pm "])
+    contact_info: Optional[Dict[str, str]] = Field(None, example= {
+    "Reception": "+251-11-123-4567",
+    "Emergency": "+251-91-234-5678"})
+    available_time : Optional[List[str]] = Field(..., example=["it works every day 8:00 am - 10:pm "])
+class HelathcareCenterRespons(BaseModel):
+    center_id:str =  Field(..., example="center_id_Yekatit")
+    name: str = Field(..., example="Yekatit 12 General Hospital")
+    address: str = Field(..., example="Sdsst Kilo, Addis Ababa")
+    latitude: float = Field(..., example=9.0456)
+    longitude: float = Field(..., example=38.7612)
+    specialists: List[str] = Field(..., example=["Cardiology", "Neurology"])
+    contact_info: Dict[str, str]= Field(None, example= {
+    "Reception": "+251-11-123-4567",
+    "Emergency": "+251-91-234-5678"})
+    available_time : List[str] = Field(..., example=["it works every day 8:00 am - 10:pm "])
