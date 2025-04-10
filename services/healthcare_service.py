@@ -7,6 +7,9 @@ from bson import ObjectId
 from pymongo import GEOSPHERE
 import logging
 
+from schemas.saved_search_schemas import SavedSearchCreate
+from services.saved_search_service import create_search_record
+
 collection = database["healthcare_centers"]
 
 #Ensure geospatial indexing for location-based search
@@ -33,7 +36,7 @@ async def create_healthcare_center(center: HealthcareCenterCreate):
         logging.error(f"Error creating healthcare center: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-async def search_healthcare_centers(search_data: HealthcareSearch):
+async def search_healthcare_centers(user_id:str , search_data: HealthcareSearch):
     """
     Search for healthcare centers based on specialty and location.
 
@@ -60,7 +63,13 @@ async def search_healthcare_centers(search_data: HealthcareSearch):
 
         if not centers:
             raise HTTPException(status_code=404, detail="No matching healthcare centers found")
-
+        search_record = SavedSearchCreate(
+            user_id= user_id,
+            search_id=str(uuid.uuid4()),
+            search_parameters=search_data.model_dump(),
+            results_count=len(centers)
+        )
+        await create_search_record(search_record)
         return centers
 
     except Exception as e:
@@ -92,9 +101,9 @@ async def delete_healthcare_center(center_id: str):
     except Exception as e:
         logging.error(f"Error deleting healthcare center: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-async def search_engin_health_care_center(search_data: HealthcareSearch):
+async def search_engin_health_care_center(user_id:str,search_data: HealthcareSearch):
     try:
-        query = {}
+        query = {}  
 
 
         if search_data.name:
@@ -119,6 +128,14 @@ async def search_engin_health_care_center(search_data: HealthcareSearch):
 
         if not centers:
             raise HTTPException(status_code=404, detail="No matching healthcare centers found")
+        
+        search_record = SavedSearchCreate(
+            user_id= user_id,
+            search_id=str(uuid.uuid4()),
+            search_parameters=search_data.model_dump(),
+            results_count=len(centers)
+        )
+        await create_search_record(search_record)
         return centers
 
     except Exception as e:

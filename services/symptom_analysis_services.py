@@ -23,7 +23,7 @@ async def analyze_symptoms(request: SymptomAnalysisRequest) -> SymptomAnalysisRe
     2. Recommend departments from:
        [Cardiac, Internal Medicine, Pediatrics, Orthopedics, 
         Surgery, Neurology, ENT, General Hospital]
-    3. Provide  simple first aid recommendation that 
+    3. Provide list  simple first aid recommendation that 
        applies to most of these conditions (title + description)
     
     Respond in EXACT format:
@@ -69,8 +69,8 @@ async def analyze_symptoms(request: SymptomAnalysisRequest) -> SymptomAnalysisRe
             "analysis_id": str(uuid.uuid4()),
             "user_id": request.user_id,
             "symptoms": [s.strip() for s in request.symptoms.split(",")],
-            "potential_conditions": conditions[:2],
-            "recommended_action": departments,
+            "potential_conditions": conditions,
+            "healthCare_center_specialty": departments,
             "first_aid": {  # Unified first aid for all conditions
                 "title": first_aid_title,
                 "description": first_aid_desc

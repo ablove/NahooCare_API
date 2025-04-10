@@ -18,8 +18,7 @@ async def create_admin(admin: AdminCreate):
 
         admin_data = admin.dict()
         admin_data["password"] = hash_password(admin.password)
-
-        result = await collection.insert_one(admin_data)
+        result = await collection.insert_one()
         if not result.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to create admin account")
 
