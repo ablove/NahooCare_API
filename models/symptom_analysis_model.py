@@ -22,7 +22,7 @@ class SyptomAnalysis(BaseModel):
     symptoms: List[str]
     potential_conditions: List[str] 
     first_aid : Dict[str, str]
-    recommended_action: List[str] 
+    healthCare_center_specialty: List[str] 
     analyzed_at: str 
     
     class Config:

@@ -19,7 +19,7 @@ class Admin(BaseModel):
     full_name: str
     email: str
     password: str
-    role: str = Field(default="admin", example="admin")  # Fixed role
+    #role: str = Field(default="admin", example="admin")  # Fixed role
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
         arbitrary_types_allowed = True  # Allows ObjectId if needed

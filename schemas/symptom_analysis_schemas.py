@@ -13,6 +13,6 @@ class SymptomAnalysisResponse(BaseModel):
     symptoms:  List[str] = Field(..., examples=[["Fever", "Cough", "Fatigue"]])
     first_aid :Dict[str, str] = Field(...,examples=[["drink cold water" , "rub your chest"]])
     potential_conditions: list[str] = Field(..., examples=[["COVID-19", "Influenza"]])
-    recommended_action: list[str] = Field(..., examples=[["General", "Internal Medicine"]])
+    healthCare_center_specialty: list[str] = Field(..., examples=[["General", "Internal Medicine"]])
     analyzed_at: str
 
