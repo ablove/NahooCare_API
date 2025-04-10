@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
-from typing import List
+from typing import Dict, List
 class PyObjectId(str):
     """Custom validator for MongoDB ObjectId"""
     @classmethod
@@ -23,7 +23,7 @@ class HealthcareCenter(BaseModel):
     longitude: float
     specialists: List[str]
     available_Time : List[str]
-    contact_number: str 
+    contact_number: Dict[str, str]
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
         arbitrary_types_allowed = True  # Allows ObjectId if needed

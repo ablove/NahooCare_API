@@ -13,8 +13,6 @@ collection = database["healthcare_centers"]
 collection.create_index([("location", GEOSPHERE)])
 
 async def create_healthcare_center(center: HealthcareCenterCreate):
-
-    
     try:
         existing_center = await collection.find_one({"name": center.name})
         if existing_center:
@@ -24,7 +22,7 @@ async def create_healthcare_center(center: HealthcareCenterCreate):
         
         center_data["location"] = {"type": "Point", "coordinates": [center.longitude, center.latitude]} 
         # Geospatial field
-        center_data["center_id"] = str(uuid.uuid4())
+        center_data["center_id"] = "center_id" + center.name
         result = await collection.insert_one(center_data)
         if not result.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to create healthcare center")
@@ -98,15 +96,15 @@ async def search_engin_health_care_center(search_data: HealthcareSearch):
     try:
         query = {}
 
-        # 🔹 Search by Name
+
         if search_data.name:
             query["name"] = {"$regex": search_data.name, "$options": "i"}  # Case-insensitive
 
-        # 🔹 Search by Specialty
+
         if search_data.specialty:
             query["specialists"] = search_data.specialty  # Matches exact specialty
 
-        # 🔹 Search by Location (Geo-based)
+
         if search_data.latitude and search_data.longitude:
             query["location"] = {
                 "$near": {
@@ -115,7 +113,7 @@ async def search_engin_health_care_center(search_data: HealthcareSearch):
                 }
             }
 
-        # 🔹 Pagination
+
         skip = (search_data.page - 1) * search_data.page_size
         centers = await collection.find(query).skip(skip).limit(search_data.page_size).to_list(None)
 
