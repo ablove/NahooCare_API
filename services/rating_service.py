@@ -1,6 +1,7 @@
+from typing import List
 from fastapi import HTTPException
 from db.mongodb import database
-from schemas.rating_schema import RatingCreate , RatingUpdate
+from schemas.rating_schema import RatingCreate, RatingResponse , RatingUpdate
 from datetime import datetime
 import logging
 
@@ -16,6 +17,7 @@ async def submit_rating(rating: RatingCreate):
 
         rating_data = rating.dict()
         rating_data["rated_at"] = datetime.utcnow()
+        rating_data["rating_id"] = "rating_id_" + rating.center_id +'_' + rating.user_id
 
         result = await collection.insert_one(rating_data)
         if not result.inserted_id:
@@ -24,25 +26,46 @@ async def submit_rating(rating: RatingCreate):
         #  Update Average Rating in Healthcare Center
         await update_healthcare_rating(rating.center_id)
 
-        return str(result.inserted_id)
+        return True 
 
     except Exception as e:
         logging.error(f"Error submitting rating: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 # Get Ratings for a Healthcare Center
-async def get_ratings(center_id: str):
+async def get_ratings(center_id: str) -> List[RatingResponse]:
     try:
-        ratings = await collection.find({"center_id": center_id}).to_list(10)  # Limit results to 10
+        # Fetch ratings, sorted by `rated_at` (newest first), limited to 10
+        ratings = await collection.find({"center_id": center_id}) \
+                                 .sort("rated_at", -1) \
+                                 .to_list(10)
+        
         if not ratings:
             raise HTTPException(status_code=404, detail="No ratings found for this center")
 
-        return ratings
+        # Convert MongoDB documents to RatingResponse objects
+        rating_responses = []
+        for rating in ratings:
+            # Ensure `_id` is converted to string (if used as rating_id)
+            if "_id" in rating:
+                rating["rating_id"] = str(rating["_id"])
+            
+            # Validate and create RatingResponse object
+            rating_response = RatingResponse(
+                rating_id=rating["rating_id"],
+                user_id=rating["user_id"],
+                center_id=rating["center_id"],
+                rating_value=rating["rating_value"],
+                comment=rating["comment"],
+                rated_at=rating["rated_at"]
+            )
+            rating_responses.append(rating_response)
+
+        return rating_responses
 
     except Exception as e:
         logging.error(f"Error retrieving ratings: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
 # Calculate & Update Healthcare Center Rating
 async def update_healthcare_rating(center_id: str):
     try:

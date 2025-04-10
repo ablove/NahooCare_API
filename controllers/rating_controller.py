@@ -7,13 +7,14 @@ router = APIRouter()
 
 
 @router.post("/submit")
-async def rate(rating: RatingCreate, current_user: dict = Depends(get_current_user)):
+async def rate(rating: RatingCreate):
     result = await submit_rating(rating)
-    return {"message": "Rating submitted successfully", "id": result}
+    if result : 
+        return {"message": "Rating submitted successfully"}
 
 
 @router.get("/{center_id}")
-async def get_center_ratings(center_id: str, current_user: dict = Depends(get_current_user)):
+async def get_center_ratings(center_id: str):
     return await get_ratings(center_id)
 
 @router.put("/{center_id}")
