@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException
-from schemas.saved_search_schemas import SearchHistoryCreate
-from services.saved_search_service import add_search_history, get_search_history_by_user, delete_search_history
+from schemas.saved_search_schemas import SavedSearchCreate,SavedSearchResponse
+from services.saved_search_service import create_search_record,get_user_search_history, delete_search_history
 
 router = APIRouter()
 
 # Add a New Search History
 @router.post("/add-history")
-async def add_history(search: SearchHistoryCreate):
+async def add_history(search:  SavedSearchCreate):
     """
     Endpoint to add a new search history.
     """
-    result = await add_search_history(search)
+    result = await create_search_record(search)
     if result:
         return {"message": "Search history added successfully", "id": result}
     raise HTTPException(status_code=400, detail="Failed to add search history")
@@ -21,7 +21,7 @@ async def get_history(user_id: str):
     """
     Endpoint to retrieve all search histories for a specified user.
     """
-    histories = await get_search_history_by_user(user_id)
+    histories = await get_user_search_history(user_id)
     if histories:
         return histories
     raise HTTPException(status_code=404, detail="No search history found")

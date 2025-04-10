@@ -16,8 +16,8 @@ async def create(center: HealthcareCenterCreate):#current_user: dict = Depends(g
         return {"message": "Healthcare center created successfully"}
 
 @router.post("/search")
-async def search(search_data: HealthcareSearch):#current_user: dict = Depends(get_current_user)):
-    return await search_healthcare_centers(search_data)
+async def search(user_id:str,search_data: HealthcareSearch):#current_user: dict = Depends(get_current_user)):
+    return await search_healthcare_centers(user_id,search_data)
 @router.put("/healthcare/{center_id}")
 async def update_center(center_id: str, update_data: HealthcareCenterUpdate):#) current_user: dict = Depends(get_current_user)):
     return await update_healthcare_center(center_id, update_data)
@@ -26,5 +26,5 @@ async def update_center(center_id: str, update_data: HealthcareCenterUpdate):#) 
 async def delete_center(center_id: str):#current_user: dict = Depends(get_current_user)):
     return await delete_healthcare_center(center_id)
 @router.post("search/specification/")
-async def searchEngin(search_data: HealthcareSearch):
-    return await search_engin_health_care_center(search_data)
+async def searchEngin(user_id:str,search_data: HealthcareSearch):
+    return await search_engin_health_care_center(user_id,search_data)
