@@ -7,10 +7,10 @@ router = APIRouter()
 
 
 @router.post("/create")
-async def create(profile: HealthProfileCreate):
-    result = await create_health_profile(profile)
+async def create(user_id:str , profile: HealthProfileCreate):
+    result = await create_health_profile(user_id,profile)
     if result:
-        return {"message": "Health profile created successfully", "id": result}
+        return "Account create success Fully"
     raise HTTPException(status_code=400, detail="Failed to create health profile")
 
 

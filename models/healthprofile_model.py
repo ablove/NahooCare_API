@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from datetime import datetime
@@ -16,12 +17,12 @@ class PyObjectId(str):
 class HealthProfile(BaseModel):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     profile_id: str
-    user_id: int 
+    user_id: str
     blood_type: str
-    allergies: str
-    chronic_conditions: str
-    medical_history: str 
-    last_update: datetime = Field(default_factory=datetime.utcnow)  # Auto timestamp
+    allergies: List[str]
+    chronic_conditions: List[str]
+    medical_history: List[str]
+    last_update: datetime = Field(default_factory=datetime.utcnow)  
 
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
