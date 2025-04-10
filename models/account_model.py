@@ -16,16 +16,15 @@ class PyObjectId(str):
 
 class Account(BaseModel):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
-    user_id: int
+    user_id: str 
     full_name: str
     phone_number: str
-    location: str
     hashed_password: str  # Store hashed passwords
     gender: str
     secret_question: str
     secret_answer: str  # Store hashed secret answer
     age: int
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: str
 
     class Config:
         json_encoders = {ObjectId: str}  # Ensure ObjectId is serialized as a string
